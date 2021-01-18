@@ -48,7 +48,7 @@ jobs:
   create-draft-release:
     needs:
     - build
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/download-artifact@v2
       with:
@@ -58,7 +58,7 @@ jobs:
       id: get_latest_release
       uses: octokit/request-action@v2.x
       with:
-        rote: GET /repos/{repo}/releases/latest
+        route: GET /repos/{repo}/releases/latest
         repo: ${{ github.repository }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
