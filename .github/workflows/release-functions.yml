@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - functions/**
-  workflow_run:
+  workflow_dispatch:
 
 env:
   dotnet-version: '3.1.x'
