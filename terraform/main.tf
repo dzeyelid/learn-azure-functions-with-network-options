@@ -23,3 +23,10 @@ module "service_endpint_west_eu" {
 
   identifier = "${var.identifier}-sewe"
 }
+
+module "private_endpint" {
+  source = "./modules/private_endpoint"
+
+  identifier = "${var.identifier}-pe"
+  location   = "japaneast"
+}
