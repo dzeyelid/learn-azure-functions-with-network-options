@@ -1,0 +1,86 @@
+name: Function pacakge release as draft
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - functions/**
+  workflow_dispatch:
+
+env:
+  dotnet-version: '3.1.x'
+  artifact-name-function-package: function-package
+  archive-file-name: functions.zip
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      functions-dir: ./functions
+      output-dir: ${{ github.workspace }}/outputs
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core SDK ${{ env.dotnet-version }}
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ env.dotnet-version }}
+    - name: Build package
+      run: |
+        pushd ${{ functions-dir }}
+        dotnet restore
+        dotnet build --configuration Release
+        dotnet publish --configuration Release --output ${{ env.output-dir }}
+        popd
+    - name: Archive
+      run: |
+        Compress-Archive -Path ${{ env.output-dir }}/* -DestinationPath ${{ env.archive-file-name }}
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.artifact-name-function-package }}
+        path: ${{ env.archive-file-name }}
+
+  
+  create-draft-release:
+    needs:
+    - build
+    runs-on: windows-latest
+    steps:
+    - uses: actions/download-artifact@v2
+      with:
+        name: ${{ env.artifact-name-function-package }}
+        path: ${{ env.archive-file-name }}
+    - name: Get latest release
+      id: get_latest_release
+      uses: octokit/request-action@v2
+      with:
+        rote: GET /repos/{repo}/releases/latest
+        repo: ${{ github.repository }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Calculate next release version
+      id: next_release_version
+      uses: christian-draeger/increment-semantic-version@1.0.2
+      with:
+        current-version: ${{ steps.get_latest_release.outputs.data }}
+        version-fragment: 'feature'
+    - name: Create draft release
+      id: create_release
+      uses: actions/create-release@v1
+      with:
+        tag_name: ${{ steps.next_release_version.outputs.next-version || '0.0.0' }}
+        draft: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ env.archive-file-name }}
+        asset_name: ${{ env.archive-file-name }}
+        asset_content_type: application/zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
