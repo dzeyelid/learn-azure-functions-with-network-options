@@ -19,7 +19,7 @@ namespace Example.Functions
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            string host = Environment.GetEnvironmentVariable("StorageWebHostForFunc");
+            string host = Environment.GetEnvironmentVariable("StorageBlobHost");
             IPAddress[] addresses = Dns.GetHostAddresses(host);
 
             string responseMessage = JObject.FromObject(new {
