@@ -31,7 +31,7 @@ jobs:
         dotnet-version: ${{ env.dotnet-version }}
     - name: Build package
       run: |
-        pushd ${{ functions-dir }}
+        pushd ${{ env.functions-dir }}
         dotnet restore
         dotnet build --configuration Release
         dotnet publish --configuration Release --output ${{ env.output-dir }}
