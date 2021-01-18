@@ -56,7 +56,7 @@ jobs:
         path: ${{ env.archive-file-name }}
     - name: Get latest release
       id: get_latest_release
-      uses: octokit/request-action@v2
+      uses: octokit/request-action@v2.x
       with:
         rote: GET /repos/{repo}/releases/latest
         repo: ${{ github.repository }}
