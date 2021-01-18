@@ -75,6 +75,8 @@ jobs:
       with:
         current-version: ${{ steps.get_latest_release.outputs.data || '0.0.0' }}
         version-fragment: 'feature'
+    - run: |
+        ls -la
     - name: Create draft release
       id: create_release
       uses: actions/create-release@v1
