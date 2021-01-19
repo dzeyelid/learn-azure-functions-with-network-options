@@ -55,9 +55,12 @@ resource "azurerm_function_app" "main" {
   storage_account_name       = azurerm_storage_account.for_func.name
   storage_account_access_key = azurerm_storage_account.for_func.primary_access_key
   version                    = "~3"
+  https_only                 = true
 
   site_config {
-    always_on = true
+    always_on     = true
+    ftps_state    = "Disabled"
+    http2_enabled = false
   }
 
   app_settings = {
