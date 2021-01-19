@@ -64,7 +64,7 @@ jobs:
       continue-on-error: true
       uses: octokit/request-action@v2.x
       with:
-        route: GET /repos/{repo}/releases/latest
+        route: GET /repos/:repo/releases/latest
         repo: ${{ github.repository }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
