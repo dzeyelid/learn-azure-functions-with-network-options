@@ -56,9 +56,12 @@ resource "azurerm_function_app" "main" {
   storage_account_name       = azurerm_storage_account.for_func.name
   storage_account_access_key = azurerm_storage_account.for_func.primary_access_key
   version                    = "~3"
+  https_only                 = true
 
   site_config {
-    always_on = true
+    always_on     = true
+    ftps_state    = "Disabled"
+    http2_enabled = false
   }
 
   app_settings = {
@@ -72,7 +75,7 @@ resource "azurerm_function_app" "main" {
   }
 
   depends_on = [
-    azurerm_storage_share.for_func
+    azurerm_storage_account_network_rules.for_func
   ]
 }
 
@@ -96,6 +99,10 @@ resource "azurerm_storage_account_network_rules" "for_func" {
 
   default_action             = "Deny"
   virtual_network_subnet_ids = [azurerm_subnet.for_func.id]
+
+  depends_on = [
+    azurerm_storage_share.for_func
+  ]
 }
 
 resource "azurerm_storage_share" "for_func" {
