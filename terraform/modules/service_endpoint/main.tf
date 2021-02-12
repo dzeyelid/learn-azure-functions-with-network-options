@@ -60,7 +60,7 @@ resource "azurerm_function_app" "main" {
   site_config {
     always_on     = true
     ftps_state    = "Disabled"
-    http2_enabled = false
+    http2_enabled = true
   }
 
   app_settings = {
