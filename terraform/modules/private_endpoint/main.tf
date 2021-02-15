@@ -117,7 +117,7 @@ resource "azurerm_storage_account" "for_fileshare" {
   name                     = format("st%s%s%s", join("", split("-", var.identifier)), local.storage_suffix, "fs")
   location                 = azurerm_resource_group.main.location
   resource_group_name      = azurerm_resource_group.main.name
-  account_kind             = "Storagev2"
+  account_kind             = "StorageV2"
   account_tier             = "Standard"
   account_replication_type = "LRS"
 }
