@@ -15,8 +15,7 @@ resource "azurerm_storage_account_network_rules" "for_func" {
   resource_group_name  = azurerm_resource_group.main.name
   storage_account_name = azurerm_storage_account.for_func.name
 
-  default_action             = "Deny"
-  virtual_network_subnet_ids = [azurerm_subnet.for_func.id]
+  default_action = "Deny"
 }
 
 #------------------------------------------------------------------------------
