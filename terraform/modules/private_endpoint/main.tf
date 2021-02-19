@@ -79,7 +79,7 @@ resource "azurerm_function_app" "main" {
     WEBSITE_VNET_ROUTE_ALL                   = 1
     WEBSITE_DNS_SERVER                       = "168.63.129.16"
     WEBSITE_RUN_FROM_PACKAGE                 = var.function_package_url
-    StorageBlobHost                          = azurerm_storage_account.for_func.primary_blob_host
+    TargetHost                               = azurerm_storage_account.for_func.primary_blob_host
   }
 
   depends_on = [
