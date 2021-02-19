@@ -80,7 +80,11 @@ module "access_via_private_endpoint" {
 
   identifier           = var.identifier
   location             = var.location
-  function_package_url = var.access_via_private_endpoint_function_package_url
+  function_package_url = module.get_function_package_url.func.download_url
   vm_admin_username    = var.vm_admin_username
   vm_admin_password    = var.vm_admin_password
+
+  depends_on = [
+    module.get_function_package_url
+  ]
 }

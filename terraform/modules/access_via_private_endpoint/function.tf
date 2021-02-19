@@ -44,8 +44,7 @@ resource "azurerm_function_app" "main" {
     WEBSITE_VNET_ROUTE_ALL                   = 1
     WEBSITE_DNS_SERVER                       = "168.63.129.16"
     WEBSITE_RUN_FROM_PACKAGE                 = var.function_package_url
-    CosmosDBConnection                       = azurerm_cosmosdb_account.main.connection_strings[0]
-    TargetHost                               = azurerm_storage_account.main.endpoint
+    TargetHost                               = regex("^https://(?P<host>[\\d\\w.-]+):443/$", azurerm_cosmosdb_account.main.endpoint).host
   }
 
   depends_on = [
