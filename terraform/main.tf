@@ -24,14 +24,6 @@ module "get_function_package_url" {
   asset_name = each.value
 }
 
-output "get_function_package_url_result" {
-  value = module.get_function_package_url.func.download_url
-
-  depends_on = [
-    module.get_function_package_url
-  ]
-}
-
 module "service_endpoint" {
   for_each = toset(try([element(var.modules, index(var.modules, "service_endpoint"))], []))
 
