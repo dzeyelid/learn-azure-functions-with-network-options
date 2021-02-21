@@ -1,15 +1,16 @@
 locals {
-  module_name          = "service-endpoint"
-  virtual_network_name = "vnet-${var.identifier}-${local.module_name}"
-  subnet_name          = "snet-${var.identifier}-${local.module_name}"
-  app_plan_name        = "plan-${var.identifier}-${local.module_name}"
-  function_name        = "func-${var.identifier}-${local.module_name}"
+  module_name          = "storage-as-se-we"
+  identifier_in_module = "${var.identifier}-${local.module_name}"
+  virtual_network_name = "vnet-${local.identifier_in_module}"
+  subnet_name          = "snet-${local.identifier_in_module}"
+  app_plan_name        = "plan-${local.identifier_in_module}"
+  function_name        = "func-${local.identifier_in_module}"
   vnet_address_space   = "10.0.0.0/16"
   storage_suffix       = "se"
 }
 
 resource "azurerm_resource_group" "main" {
-  name     = "rg-${var.identifier}"
+  name     = "rg-${local.identifier_in_module}"
   location = "westeurope"
 }
 
@@ -84,8 +85,18 @@ resource "azurerm_app_service_virtual_network_swift_connection" "module" {
   subnet_id      = azurerm_subnet.for_func.id
 }
 
+resource "random_string" "storage_for_func" {
+  length  = 22
+  upper   = false
+  special = false
+  keepers = {
+    resource_group_id = azurerm_resource_group.main.id
+    module            = local.identifier_in_module
+  }
+}
+
 resource "azurerm_storage_account" "for_func" {
-  name                     = format("st%s%s", join("", split("-", var.identifier)), local.storage_suffix)
+  name                     = "st${random_string.storage_for_func.result}"
   location                 = azurerm_resource_group.main.location
   resource_group_name      = azurerm_resource_group.main.name
   account_kind             = "StorageV2"

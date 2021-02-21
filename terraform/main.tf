@@ -24,12 +24,12 @@ module "get_function_package_url" {
   asset_name = each.value
 }
 
-module "service_endpoint" {
-  for_each = toset(try([element(var.modules, index(var.modules, "service_endpoint"))], []))
+module "storage_as_service_endpoint" {
+  count = 0 <= try(index(var.modules, "storage_as_service_endpoint"), -1) ? 1 : 0
 
-  source = "./modules/service_endpoint"
+  source = "./modules/storage_as_service_endpoint"
 
-  identifier           = "${var.identifier}-se"
+  identifier           = var.identifier
   location             = var.location
   function_package_url = module.get_function_package_url.func.download_url
 
@@ -38,12 +38,12 @@ module "service_endpoint" {
   ]
 }
 
-module "service_endpoint_west_eu" {
-  for_each = toset(try([element(var.modules, index(var.modules, "service_endpoint_west_eu"))], []))
+module "storage_as_service_endpoint_west_eu" {
+  count = 0 <= try(index(var.modules, "storage_as_service_endpoint_west_eu"), -1) ? 1 : 0
 
-  source = "./modules/service_endpoint_west_eu"
+  source = "./modules/storage_as_service_endpoint_west_eu"
 
-  identifier           = "${var.identifier}-sewe"
+  identifier           = var.identifier
   function_package_url = module.get_function_package_url.func.download_url
 
   depends_on = [
@@ -51,12 +51,12 @@ module "service_endpoint_west_eu" {
   ]
 }
 
-module "private_endpoint" {
-  for_each = toset(try([element(var.modules, index(var.modules, "private_endpoint"))], []))
+module "storage_via_private_endpoint" {
+  count = 0 <= try(index(var.modules, "storage_via_private_endpoint"), -1) ? 1 : 0
 
-  source = "./modules/private_endpoint"
+  source = "./modules/storage_via_private_endpoint"
 
-  identifier           = "${var.identifier}-pe"
+  identifier           = var.identifier
   location             = var.location
   function_package_url = module.get_function_package_url.func.download_url
 
@@ -65,10 +65,24 @@ module "private_endpoint" {
   ]
 }
 
-module "access_via_private_endpoint" {
-  for_each = toset(try([element(var.modules, index(var.modules, "access_via_private_endpoint"))], []))
+module "access_cosmosdb_via_private_endpoint" {
+  count = 0 <= try(index(var.modules, "access_cosmosdb_via_private_endpoint"), -1) ? 1 : 0
 
-  source = "./modules/access_via_private_endpoint"
+  source = "./modules/access_cosmosdb_via_private_endpoint"
+
+  identifier           = var.identifier
+  location             = var.location
+  function_package_url = module.get_function_package_url.func.download_url
+
+  depends_on = [
+    module.get_function_package_url
+  ]
+}
+
+module "access_func_via_private_endpoint" {
+  count = 0 <= try(index(var.modules, "access_func_via_private_endpoint"), -1) ? 1 : 0
+
+  source = "./modules/access_func_via_private_endpoint"
 
   identifier           = var.identifier
   location             = var.location
