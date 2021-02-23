@@ -4,26 +4,21 @@
 # }
 
 output "storage_as_service_endpoint_function_url_check" {
-  value      = try(module.storage_as_service_endpoint.*.function_url_check, "Not used")
-  depends_on = [module.storage_as_service_endpoint]
+  value = try(module.storage_as_service_endpoint["selected"].function_url_check, "Not used")
 }
 
 output "storage_as_service_endpoint_west_eu_function_url_check" {
-  value      = try(module.storage_as_service_endpoint_west_eu.*.function_url_check, "Not used")
-  depends_on = [module.storage_as_service_endpoint_west_eu]
+  value = try(module.storage_as_service_endpoint_west_eu["selected"].function_url_check, "Not used")
 }
 
 output "storage_via_private_endpoint_function_url_check" {
-  value      = try(module.storage_via_private_endpoint.*.function_url_check, "Not used")
-  depends_on = [module.storage_via_private_endpoint]
+  value = try(module.storage_via_private_endpoint["selected"].function_url_check, "Not used")
 }
 
 output "access_cosmosdb_via_private_endpoint_function_url_check" {
-  value      = try(module.access_cosmosdb_via_private_endpoint.*.function_url_check, "Not used")
-  depends_on = [module.access_cosmosdb_via_private_endpoint]
+  value = try(module.access_cosmosdb_via_private_endpoint["selected"].function_url_check, "Not used")
 }
 
 output "access_func_via_private_endpoint_function_url_check" {
-  value      = try(module.access_func_via_private_endpoint.*.function_url_check, "Not used")
-  depends_on = [module.access_func_via_private_endpoint]
+  value = try(module.access_func_via_private_endpoint["selected"].function_url_check, "Not used")
 }

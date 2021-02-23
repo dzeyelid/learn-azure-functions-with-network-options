@@ -25,7 +25,7 @@ module "get_function_package_url" {
 }
 
 module "storage_as_service_endpoint" {
-  count = 0 <= try(index(var.modules, "storage_as_service_endpoint"), -1) ? 1 : 0
+  for_each = toset(0 <= try(index(var.modules, "storage_as_service_endpoint"), -1) ? ["selected"] : [])
 
   source = "./modules/storage_as_service_endpoint"
 
@@ -39,7 +39,7 @@ module "storage_as_service_endpoint" {
 }
 
 module "storage_as_service_endpoint_west_eu" {
-  count = 0 <= try(index(var.modules, "storage_as_service_endpoint_west_eu"), -1) ? 1 : 0
+  for_each = toset(0 <= try(index(var.modules, "storage_as_service_endpoint_west_eu"), -1) ? ["selected"] : [])
 
   source = "./modules/storage_as_service_endpoint_west_eu"
 
@@ -52,7 +52,7 @@ module "storage_as_service_endpoint_west_eu" {
 }
 
 module "storage_via_private_endpoint" {
-  count = 0 <= try(index(var.modules, "storage_via_private_endpoint"), -1) ? 1 : 0
+  for_each = toset(0 <= try(index(var.modules, "storage_via_private_endpoint"), -1) ? ["selected"] : [])
 
   source = "./modules/storage_via_private_endpoint"
 
@@ -66,7 +66,7 @@ module "storage_via_private_endpoint" {
 }
 
 module "access_cosmosdb_via_private_endpoint" {
-  count = 0 <= try(index(var.modules, "access_cosmosdb_via_private_endpoint"), -1) ? 1 : 0
+  for_each = toset(0 <= try(index(var.modules, "access_cosmosdb_via_private_endpoint"), -1) ? ["selected"] : [])
 
   source = "./modules/access_cosmosdb_via_private_endpoint"
 
@@ -80,7 +80,7 @@ module "access_cosmosdb_via_private_endpoint" {
 }
 
 module "access_func_via_private_endpoint" {
-  count = 0 <= try(index(var.modules, "access_func_via_private_endpoint"), -1) ? 1 : 0
+  for_each = toset(0 <= try(index(var.modules, "access_func_via_private_endpoint"), -1) ? ["selected"] : [])
 
   source = "./modules/access_func_via_private_endpoint"
 
