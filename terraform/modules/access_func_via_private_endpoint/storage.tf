@@ -2,8 +2,18 @@ locals {
   private_storage_blob_dns_zone_name = "privatelink.blob.core.windows.net"
 }
 
+resource "random_string" "storage_for_func" {
+  length  = 22
+  upper   = false
+  special = false
+  keepers = {
+    resource_group_id = azurerm_resource_group.main.id
+    module            = local.identifier_in_module
+  }
+}
+
 resource "azurerm_storage_account" "for_func" {
-  name                     = format("st%s", join("", split("-", local.identifier_in_module)))
+  name                     = "st${random_string.storage_for_func.result}"
   location                 = azurerm_resource_group.main.location
   resource_group_name      = azurerm_resource_group.main.name
   account_kind             = "StorageV2"
@@ -15,8 +25,7 @@ resource "azurerm_storage_account_network_rules" "for_func" {
   resource_group_name  = azurerm_resource_group.main.name
   storage_account_name = azurerm_storage_account.for_func.name
 
-  default_action             = "Deny"
-  virtual_network_subnet_ids = [azurerm_subnet.for_func.id]
+  default_action = "Deny"
 }
 
 #------------------------------------------------------------------------------
@@ -24,7 +33,7 @@ resource "azurerm_storage_account_network_rules" "for_func" {
 # See https://docs.microsoft.com/en-us/azure/azure-functions/functions-networking-options#restrict-your-storage-account-to-a-virtual-network-preview
 #------------------------------------------------------------------------------
 resource "azurerm_storage_account" "for_fileshare" {
-  name                     = format("st%s%s", join("", split("-", local.identifier_in_module)), "fs")
+  name                     = "st${substr(random_string.storage_for_func.result, 0, 20)}fs"
   location                 = azurerm_resource_group.main.location
   resource_group_name      = azurerm_resource_group.main.name
   account_kind             = "StorageV2"

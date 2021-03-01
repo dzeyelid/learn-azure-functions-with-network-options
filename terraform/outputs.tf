@@ -1,11 +1,24 @@
-# output "service_endpoint_function_url_check" {
-#   value = 0 <= try(index(var.modules, "service_endpoint"), -1) ? tostring(module.service_endpoint.function_url_check) : "Not used"
+# output "get_function_package_url_result" {
+#   value      = module.get_function_package_url.func.download_url
+#   depends_on = [module.get_function_package_url]
 # }
 
-# output "service_endpoint_west_eu_function_url_check" {
-#   value = 0 <= try(index(var.modules, "service_endpoint_west_eu"), -1) ? tostring(module.service_endpoint_west_eu.function_url_check) : "Not used"
-# }
+output "storage_as_service_endpoint_function_url_check" {
+  value = try(module.storage_as_service_endpoint["selected"].function_url_check, "Not used")
+}
 
-# output "private_endpoint_function_url_check" {
-#   value = 0 <= try(index(var.modules, "private_endpoint"), -1) ? tostring(module.private_endpoint.function_url_check) : "Not used"
-# }
+output "storage_as_service_endpoint_west_eu_function_url_check" {
+  value = try(module.storage_as_service_endpoint_west_eu["selected"].function_url_check, "Not used")
+}
+
+output "storage_via_private_endpoint_function_url_check" {
+  value = try(module.storage_via_private_endpoint["selected"].function_url_check, "Not used")
+}
+
+output "access_cosmosdb_via_private_endpoint_function_url_check" {
+  value = try(module.access_cosmosdb_via_private_endpoint["selected"].function_url_check, "Not used")
+}
+
+output "access_func_via_private_endpoint_function_url_check" {
+  value = try(module.access_func_via_private_endpoint["selected"].function_url_check, "Not used")
+}

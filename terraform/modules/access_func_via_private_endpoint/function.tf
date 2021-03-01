@@ -3,6 +3,13 @@ locals {
   private_function_dns_zone_name = "privatelink.azurewebsites.net"
 }
 
+resource "azurerm_application_insights" "for_func" {
+  name                = "appi-${local.identifier_in_module}"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  application_type    = "web"
+}
+
 resource "azurerm_app_service_plan" "main" {
   name                = local.app_plan_name
   location            = azurerm_resource_group.main.location
@@ -32,12 +39,12 @@ resource "azurerm_function_app" "main" {
   app_settings = {
     WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = azurerm_storage_account.for_fileshare.primary_connection_string
     WEBSITE_CONTENTSHARE                     = local.function_name
+    APPINSIGHTS_INSTRUMENTATIONKEY           = azurerm_application_insights.for_func.instrumentation_key
     FUNCTIONS_WORKER_RUNTIME                 = "dotnet"
     WEBSITE_VNET_ROUTE_ALL                   = 1
     WEBSITE_DNS_SERVER                       = "168.63.129.16"
     WEBSITE_RUN_FROM_PACKAGE                 = var.function_package_url
-    CosmosDBConnection                       = azurerm_cosmosdb_account.main.connection_strings[0]
-    TargetHost                               = azurerm_storage_account.main.endpoint
+    TargetHost                               = regex("^https://(?P<host>[\\d\\w.-]+):443/$", azurerm_cosmosdb_account.main.endpoint).host
   }
 
   depends_on = [

@@ -1,20 +1,21 @@
 locals {
-  module_name                        = "private-endpoint"
-  subnet_name                        = "snet-${var.identifier}-${local.module_name}"
-  app_plan_name                      = "plan-${var.identifier}-${local.module_name}"
-  function_name                      = "func-${var.identifier}-${local.module_name}"
+  module_name                        = "storage-via-pe"
+  identifier_in_module               = "${var.identifier}-${local.module_name}"
+  subnet_name                        = "snet-${local.identifier_in_module}"
+  app_plan_name                      = "plan-${local.identifier_in_module}"
+  function_name                      = "func-${local.identifier_in_module}"
   vnet_address_space                 = "10.0.0.0/16"
   storage_suffix                     = "pe"
   private_storage_blob_dns_zone_name = "privatelink.blob.core.windows.net"
 }
 
 resource "azurerm_resource_group" "main" {
-  name     = "rg-${var.identifier}"
+  name     = "rg-${local.identifier_in_module}"
   location = var.location
 }
 
 resource "azurerm_virtual_network" "main" {
-  name                = "vnet-${var.identifier}"
+  name                = "vnet-${local.identifier_in_module}"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   address_space       = [local.vnet_address_space]
@@ -92,8 +93,18 @@ resource "azurerm_app_service_virtual_network_swift_connection" "main" {
   subnet_id      = azurerm_subnet.for_func.id
 }
 
+resource "random_string" "storage_for_func" {
+  length  = 22
+  upper   = false
+  special = false
+  keepers = {
+    resource_group_id = azurerm_resource_group.main.id
+    module            = local.identifier_in_module
+  }
+}
+
 resource "azurerm_storage_account" "for_func" {
-  name                     = format("st%s%s", join("", split("-", var.identifier)), local.storage_suffix)
+  name                     = "st${random_string.storage_for_func.result}"
   location                 = azurerm_resource_group.main.location
   resource_group_name      = azurerm_resource_group.main.name
   account_kind             = "StorageV2"
@@ -105,8 +116,7 @@ resource "azurerm_storage_account_network_rules" "for_func" {
   resource_group_name  = azurerm_resource_group.main.name
   storage_account_name = azurerm_storage_account.for_func.name
 
-  default_action             = "Deny"
-  virtual_network_subnet_ids = [azurerm_subnet.for_func.id]
+  default_action = "Deny"
 }
 
 #------------------------------------------------------------------------------
@@ -114,7 +124,7 @@ resource "azurerm_storage_account_network_rules" "for_func" {
 # See https://docs.microsoft.com/en-us/azure/azure-functions/functions-networking-options#restrict-your-storage-account-to-a-virtual-network-preview
 #------------------------------------------------------------------------------
 resource "azurerm_storage_account" "for_fileshare" {
-  name                     = format("st%s%s%s", join("", split("-", var.identifier)), local.storage_suffix, "fs")
+  name                     = "st${substr(random_string.storage_for_func.result, 0, 20)}fs"
   location                 = azurerm_resource_group.main.location
   resource_group_name      = azurerm_resource_group.main.name
   account_kind             = "StorageV2"
