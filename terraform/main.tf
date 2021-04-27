@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 2.42"
+      version = ">= 2.0.0"
     }
   }
 }
@@ -31,19 +31,6 @@ module "storage_as_service_endpoint" {
 
   identifier           = var.identifier
   location             = var.location
-  function_package_url = module.get_function_package_url.func.download_url
-
-  depends_on = [
-    module.get_function_package_url
-  ]
-}
-
-module "storage_as_service_endpoint_west_eu" {
-  for_each = toset(0 <= try(index(var.modules, "storage_as_service_endpoint_west_eu"), -1) ? ["selected"] : [])
-
-  source = "./modules/storage_as_service_endpoint_west_eu"
-
-  identifier           = var.identifier
   function_package_url = module.get_function_package_url.func.download_url
 
   depends_on = [

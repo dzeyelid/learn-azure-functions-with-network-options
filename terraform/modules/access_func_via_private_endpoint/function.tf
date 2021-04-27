@@ -37,8 +37,9 @@ resource "azurerm_function_app" "main" {
   }
 
   app_settings = {
-    WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = azurerm_storage_account.for_fileshare.primary_connection_string
+    WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = azurerm_storage_account.for_func.primary_connection_string
     WEBSITE_CONTENTSHARE                     = local.function_name
+    WEBSITE_CONTENTOVERVNET                  = 1
     APPINSIGHTS_INSTRUMENTATIONKEY           = azurerm_application_insights.for_func.instrumentation_key
     FUNCTIONS_WORKER_RUNTIME                 = "dotnet"
     WEBSITE_VNET_ROUTE_ALL                   = 1

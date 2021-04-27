@@ -28,17 +28,17 @@ resource "azurerm_storage_account_network_rules" "for_func" {
   default_action = "Deny"
 }
 
-#------------------------------------------------------------------------------
-# This storage exists just for file temporarily because VNet integration does not support the drive mount feature currently.
-# See https://docs.microsoft.com/en-us/azure/azure-functions/functions-networking-options#restrict-your-storage-account-to-a-virtual-network-preview
-#------------------------------------------------------------------------------
-resource "azurerm_storage_account" "for_fileshare" {
-  name                     = "st${substr(random_string.storage_for_func.result, 0, 20)}fs"
-  location                 = azurerm_resource_group.main.location
-  resource_group_name      = azurerm_resource_group.main.name
-  account_kind             = "StorageV2"
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
+resource "azurerm_storage_share" "for_func" {
+  name                 = local.function_name
+  storage_account_name = azurerm_storage_account.for_func.name
+
+  acl {
+    id = data.azurerm_client_config.current.object_id
+
+    access_policy {
+      permissions = "rwdl"
+    }
+  }
 }
 
 #------------------------------------------------------------------------------

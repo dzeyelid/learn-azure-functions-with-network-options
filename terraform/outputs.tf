@@ -7,10 +7,6 @@ output "storage_as_service_endpoint_function_url_check" {
   value = try(module.storage_as_service_endpoint["selected"].function_url_check, "Not used")
 }
 
-output "storage_as_service_endpoint_west_eu_function_url_check" {
-  value = try(module.storage_as_service_endpoint_west_eu["selected"].function_url_check, "Not used")
-}
-
 output "storage_via_private_endpoint_function_url_check" {
   value = try(module.storage_via_private_endpoint["selected"].function_url_check, "Not used")
 }

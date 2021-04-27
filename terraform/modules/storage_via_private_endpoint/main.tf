@@ -7,7 +7,10 @@ locals {
   vnet_address_space                 = "10.0.0.0/16"
   storage_suffix                     = "pe"
   private_storage_blob_dns_zone_name = "privatelink.blob.core.windows.net"
+  private_storage_file_dns_zone_name = "privatelink.file.core.windows.net"
 }
+
+data "azurerm_client_config" "current" {}
 
 resource "azurerm_resource_group" "main" {
   name     = "rg-${local.identifier_in_module}"
@@ -74,8 +77,9 @@ resource "azurerm_function_app" "main" {
   }
 
   app_settings = {
-    WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = azurerm_storage_account.for_fileshare.primary_connection_string
+    WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = azurerm_storage_account.for_func.primary_connection_string
     WEBSITE_CONTENTSHARE                     = local.function_name
+    WEBSITE_CONTENTOVERVNET                  = 1
     FUNCTIONS_WORKER_RUNTIME                 = "dotnet"
     WEBSITE_VNET_ROUTE_ALL                   = 1
     WEBSITE_DNS_SERVER                       = "168.63.129.16"
@@ -119,17 +123,17 @@ resource "azurerm_storage_account_network_rules" "for_func" {
   default_action = "Deny"
 }
 
-#------------------------------------------------------------------------------
-# This storage exists just for file temporarily because VNet integration does not support the drive mount feature currently.
-# See https://docs.microsoft.com/en-us/azure/azure-functions/functions-networking-options#restrict-your-storage-account-to-a-virtual-network-preview
-#------------------------------------------------------------------------------
-resource "azurerm_storage_account" "for_fileshare" {
-  name                     = "st${substr(random_string.storage_for_func.result, 0, 20)}fs"
-  location                 = azurerm_resource_group.main.location
-  resource_group_name      = azurerm_resource_group.main.name
-  account_kind             = "StorageV2"
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
+resource "azurerm_storage_share" "for_func" {
+  name                 = local.function_name
+  storage_account_name = azurerm_storage_account.for_func.name
+
+  acl {
+    id = data.azurerm_client_config.current.object_id
+
+    access_policy {
+      permissions = "rwdl"
+    }
+  }
 }
 
 #------------------------------------------------------------------------------
@@ -137,6 +141,11 @@ resource "azurerm_storage_account" "for_fileshare" {
 #------------------------------------------------------------------------------
 resource "azurerm_private_dns_zone" "for_func_blob" {
   name                = local.private_storage_blob_dns_zone_name
+  resource_group_name = azurerm_resource_group.main.name
+}
+
+resource "azurerm_private_dns_zone" "for_func_file" {
+  name                = local.private_storage_file_dns_zone_name
   resource_group_name = azurerm_resource_group.main.name
 }
 
@@ -166,5 +175,31 @@ resource "azurerm_private_dns_zone_virtual_network_link" "for_func_blob" {
   name                  = "for-func-blob-link"
   resource_group_name   = azurerm_resource_group.main.name
   private_dns_zone_name = azurerm_private_dns_zone.for_func_blob.name
+  virtual_network_id    = azurerm_virtual_network.main.id
+}
+
+resource "azurerm_private_endpoint" "for_func_file" {
+  name                = "${azurerm_storage_account.for_func.name}-file-private-endpoint"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  subnet_id           = azurerm_subnet.for_private_endpoint.id
+
+  private_dns_zone_group {
+    name                 = "default"
+    private_dns_zone_ids = [azurerm_private_dns_zone.for_func_file.id]
+  }
+
+  private_service_connection {
+    name                           = "StorageFilePrivateLinkConnection"
+    private_connection_resource_id = azurerm_storage_account.for_func.id
+    is_manual_connection           = false
+    subresource_names              = ["file"]
+  }
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "for_func_file" {
+  name                  = "for-func-file-link"
+  resource_group_name   = azurerm_resource_group.main.name
+  private_dns_zone_name = azurerm_private_dns_zone.for_func_file.name
   virtual_network_id    = azurerm_virtual_network.main.id
 }

@@ -6,6 +6,8 @@ locals {
   vnet_address_space   = "10.0.0.0/16"
 }
 
+data "azurerm_client_config" "current" {}
+
 resource "azurerm_resource_group" "main" {
   name     = "rg-${local.identifier_in_module}"
   location = var.location

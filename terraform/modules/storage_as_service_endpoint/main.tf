@@ -13,6 +13,7 @@ resource "azurerm_resource_group" "main" {
   location = var.location
 }
 
+data "azurerm_client_config" "current" {}
 resource "azurerm_virtual_network" "main" {
   name                = "vnet-${local.identifier_in_module}"
   location            = azurerm_resource_group.main.location
@@ -65,8 +66,9 @@ resource "azurerm_function_app" "main" {
   }
 
   app_settings = {
-    WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = azurerm_storage_account.for_fileshare.primary_connection_string
+    WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = azurerm_storage_account.for_func.primary_connection_string
     WEBSITE_CONTENTSHARE                     = local.function_name
+    WEBSITE_CONTENTOVERVNET                  = 1
     FUNCTIONS_WORKER_RUNTIME                 = "dotnet"
     WEBSITE_VNET_ROUTE_ALL                   = 1
     WEBSITE_RUN_FROM_PACKAGE                 = var.function_package_url
@@ -106,15 +108,15 @@ resource "azurerm_storage_account_network_rules" "for_func" {
   virtual_network_subnet_ids = [azurerm_subnet.for_func.id]
 }
 
-#------------------------------------------------------------------------------
-# This storage exists just for file temporarily because VNet integration does not support the drive mount feature currently.
-# See https://docs.microsoft.com/en-us/azure/azure-functions/functions-networking-options#restrict-your-storage-account-to-a-virtual-network-preview
-#------------------------------------------------------------------------------
-resource "azurerm_storage_account" "for_fileshare" {
-  name                     = "st${substr(random_string.storage_for_func.result, 0, 20)}fs"
-  location                 = azurerm_resource_group.main.location
-  resource_group_name      = azurerm_resource_group.main.name
-  account_kind             = "StorageV2"
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
+resource "azurerm_storage_share" "for_func" {
+  name                 = local.function_name
+  storage_account_name = azurerm_storage_account.for_func.name
+
+  acl {
+    id = data.azurerm_client_config.current.object_id
+
+    access_policy {
+      permissions = "rwdl"
+    }
+  }
 }
