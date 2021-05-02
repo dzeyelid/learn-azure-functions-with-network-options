@@ -19,7 +19,7 @@ locals {
 
 module "get_function_package_url" {
   for_each = local.asset_names
-  source   = "./modules/get_function_package_url"
+  source   = "./modules/utils/get_function_package_url"
 
   asset_name = each.value
 }
@@ -27,7 +27,7 @@ module "get_function_package_url" {
 module "storage_as_service_endpoint" {
   for_each = toset(0 <= try(index(var.modules, "storage_as_service_endpoint"), -1) ? ["selected"] : [])
 
-  source = "./modules/storage_as_service_endpoint"
+  source = "./modules/service_endpoint/storage_as_service_endpoint"
 
   identifier           = var.identifier
   location             = var.location
@@ -41,7 +41,7 @@ module "storage_as_service_endpoint" {
 module "storage_via_private_endpoint" {
   for_each = toset(0 <= try(index(var.modules, "storage_via_private_endpoint"), -1) ? ["selected"] : [])
 
-  source = "./modules/storage_via_private_endpoint"
+  source = "./modules/private_endpoint/storage_via_private_endpoint"
 
   identifier           = var.identifier
   location             = var.location
@@ -55,7 +55,7 @@ module "storage_via_private_endpoint" {
 module "access_cosmosdb_via_private_endpoint" {
   for_each = toset(0 <= try(index(var.modules, "access_cosmosdb_via_private_endpoint"), -1) ? ["selected"] : [])
 
-  source = "./modules/access_cosmosdb_via_private_endpoint"
+  source = "./modules/private_endpoint/access_cosmosdb_via_private_endpoint"
 
   identifier           = var.identifier
   location             = var.location
@@ -69,7 +69,7 @@ module "access_cosmosdb_via_private_endpoint" {
 module "access_func_via_private_endpoint" {
   for_each = toset(0 <= try(index(var.modules, "access_func_via_private_endpoint"), -1) ? ["selected"] : [])
 
-  source = "./modules/access_func_via_private_endpoint"
+  source = "./modules/private_endpoint/access_func_via_private_endpoint"
 
   identifier           = var.identifier
   location             = var.location
