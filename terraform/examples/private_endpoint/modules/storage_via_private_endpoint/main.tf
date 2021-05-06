@@ -10,7 +10,10 @@ locals {
   private_storage_file_dns_zone_name = "privatelink.file.core.windows.net"
 }
 
-data "azurerm_client_config" "current" {}
+data "azurerm_virtual_network" "terraform" {
+  name                = var.terraform.virtual_network_name
+  resource_group_name = var.terraform.resource_group_name
+}
 
 resource "azurerm_resource_group" "main" {
   name     = "rg-${local.identifier_in_module}"
@@ -48,6 +51,22 @@ resource "azurerm_subnet" "for_private_endpoint" {
   virtual_network_name                           = azurerm_virtual_network.main.name
   address_prefixes                               = [cidrsubnet(azurerm_virtual_network.main.address_space[0], 8, 1)]
   enforce_private_link_endpoint_network_policies = true
+}
+
+# For terraform connection
+resource "azurerm_virtual_network_peering" "example" {
+  name                      = "example"
+  resource_group_name       = azurerm_resource_group.main.name
+  virtual_network_name      = azurerm_virtual_network.main.name
+  remote_virtual_network_id = data.azurerm_virtual_network.terraform.id
+}
+
+# For terraform connection
+resource "azurerm_virtual_network_peering" "terraform" {
+  name                      = "terraform"
+  resource_group_name       = data.azurerm_virtual_network.terraform.resource_group_name
+  virtual_network_name      = data.azurerm_virtual_network.terraform.name
+  remote_virtual_network_id = azurerm_virtual_network.main.id
 }
 
 resource "azurerm_app_service_plan" "main" {
@@ -126,14 +145,6 @@ resource "azurerm_storage_account_network_rules" "for_func" {
 resource "azurerm_storage_share" "for_func" {
   name                 = local.function_name
   storage_account_name = azurerm_storage_account.for_func.name
-
-  acl {
-    id = data.azurerm_client_config.current.object_id
-
-    access_policy {
-      permissions = "rwdl"
-    }
-  }
 }
 
 #------------------------------------------------------------------------------
@@ -144,9 +155,31 @@ resource "azurerm_private_dns_zone" "for_func_blob" {
   resource_group_name = azurerm_resource_group.main.name
 }
 
+resource "azurerm_private_dns_zone_virtual_network_link" "for_func_blob" {
+  name                  = "for-func-blob-link"
+  resource_group_name   = azurerm_resource_group.main.name
+  private_dns_zone_name = azurerm_private_dns_zone.for_func_blob.name
+  virtual_network_id    = azurerm_virtual_network.main.id
+}
+
 resource "azurerm_private_dns_zone" "for_func_file" {
   name                = local.private_storage_file_dns_zone_name
   resource_group_name = azurerm_resource_group.main.name
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "for_func_file" {
+  name                  = "for-func-file-link"
+  resource_group_name   = azurerm_resource_group.main.name
+  private_dns_zone_name = azurerm_private_dns_zone.for_func_file.name
+  virtual_network_id    = azurerm_virtual_network.main.id
+}
+
+# For terraform connection
+resource "azurerm_private_dns_zone_virtual_network_link" "for_terraform" {
+  name                  = "for-terraform-allow-access-to-file-share-link"
+  resource_group_name   = azurerm_resource_group.main.name
+  private_dns_zone_name = azurerm_private_dns_zone.for_func_file.name
+  virtual_network_id    = data.azurerm_virtual_network.terraform.id
 }
 
 #------------------------------------------------------------------------------
@@ -171,13 +204,6 @@ resource "azurerm_private_endpoint" "for_func_blob" {
   }
 }
 
-resource "azurerm_private_dns_zone_virtual_network_link" "for_func_blob" {
-  name                  = "for-func-blob-link"
-  resource_group_name   = azurerm_resource_group.main.name
-  private_dns_zone_name = azurerm_private_dns_zone.for_func_blob.name
-  virtual_network_id    = azurerm_virtual_network.main.id
-}
-
 resource "azurerm_private_endpoint" "for_func_file" {
   name                = "${azurerm_storage_account.for_func.name}-file-private-endpoint"
   location            = azurerm_resource_group.main.location
@@ -195,11 +221,4 @@ resource "azurerm_private_endpoint" "for_func_file" {
     is_manual_connection           = false
     subresource_names              = ["file"]
   }
-}
-
-resource "azurerm_private_dns_zone_virtual_network_link" "for_func_file" {
-  name                  = "for-func-file-link"
-  resource_group_name   = azurerm_resource_group.main.name
-  private_dns_zone_name = azurerm_private_dns_zone.for_func_file.name
-  virtual_network_id    = azurerm_virtual_network.main.id
 }

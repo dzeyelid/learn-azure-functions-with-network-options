@@ -5,6 +5,8 @@ terraform {
       version = ">= 2.0.0"
     }
   }
+
+  backend "azurerm" {}
 }
 
 provider "azurerm" {
@@ -19,38 +21,23 @@ locals {
 
 module "get_function_package_url" {
   for_each = local.asset_names
-  source   = "./modules/utils/get_function_package_url"
+  source   = "./modules/get_function_package_url"
 
   asset_name = each.value
-}
-
-module "get_client_ip" {
-  source = "./modules/utils/get_client_ip"
-}
-
-module "storage_as_service_endpoint" {
-  for_each = toset(0 <= try(index(var.modules, "storage_as_service_endpoint"), -1) ? ["selected"] : [])
-
-  source = "./modules/service_endpoint/storage_as_service_endpoint"
-
-  identifier           = var.identifier
-  location             = var.location
-  function_package_url = module.get_function_package_url.func.download_url
-  client_ip            = module.get_client_ip.client_ip
-
-  depends_on = [
-    module.get_function_package_url
-  ]
 }
 
 module "storage_via_private_endpoint" {
   for_each = toset(0 <= try(index(var.modules, "storage_via_private_endpoint"), -1) ? ["selected"] : [])
 
-  source = "./modules/private_endpoint/storage_via_private_endpoint"
+  source = "./modules/storage_via_private_endpoint"
 
   identifier           = var.identifier
   location             = var.location
   function_package_url = module.get_function_package_url.func.download_url
+  terraform = {
+    virtual_network_name = var.terraform.virtual_network_name
+    resource_group_name  = var.terraform.resource_group_name
+  }
 
   depends_on = [
     module.get_function_package_url
@@ -60,7 +47,7 @@ module "storage_via_private_endpoint" {
 module "access_cosmosdb_via_private_endpoint" {
   for_each = toset(0 <= try(index(var.modules, "access_cosmosdb_via_private_endpoint"), -1) ? ["selected"] : [])
 
-  source = "./modules/private_endpoint/access_cosmosdb_via_private_endpoint"
+  source = "./modules/access_cosmosdb_via_private_endpoint"
 
   identifier           = var.identifier
   location             = var.location
@@ -74,7 +61,7 @@ module "access_cosmosdb_via_private_endpoint" {
 module "access_func_via_private_endpoint" {
   for_each = toset(0 <= try(index(var.modules, "access_func_via_private_endpoint"), -1) ? ["selected"] : [])
 
-  source = "./modules/private_endpoint/access_func_via_private_endpoint"
+  source = "./modules/access_func_via_private_endpoint"
 
   identifier           = var.identifier
   location             = var.location

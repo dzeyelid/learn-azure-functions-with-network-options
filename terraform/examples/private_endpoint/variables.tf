@@ -6,6 +6,13 @@ variable "location" {
   type = string
 }
 
+variable "terraform" {
+  type = object({
+    virtual_network_name = string
+    resource_group_name  = string
+  })
+}
+
 variable "modules" {
   type = list(string)
 }
