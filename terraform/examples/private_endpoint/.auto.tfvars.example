@@ -2,8 +2,8 @@ location = "japaneast"
 identifier = "<identifier>"
 
 terraform = {
-  virtual_network_name = "vnet-<identifier>-terraform-runner"
-  resource_group_name = "rg-<identifier>-terraform-runner"
+  virtual_network_name = "<Virtual network name that Terraform runner in>"
+  resource_group_name = "<Resource group name that Terraform runner in>"
 }
 
 modules = [

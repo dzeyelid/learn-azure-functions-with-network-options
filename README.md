@@ -15,11 +15,11 @@ First, let's confirm the basic structure of the Azure Function. Azure Function n
 
 In this case, the Storage account's endpoints open to the public though that is secured by access keys or Shared Access Signature.
 
-## Azure Functions access Storage account as aService Endpoint
+## Azure Functions access Storage account as Service Endpoint
 
 Using Service Endpoint and virtual network restriction is an easy way to secure your routing from Azure Functions to Azure resources such as Storage Account.
 
-![Azure Function access to Storage account as a Service Endpoint](./docs/images/access-to-service-endpoint.png)
+![Azure Function access to Storage account as Service Endpoint](./docs/images/access-to-service-endpoint.png)
 
 See [README](./terraform/examples/service_endpoint/README.md) for details.
 
