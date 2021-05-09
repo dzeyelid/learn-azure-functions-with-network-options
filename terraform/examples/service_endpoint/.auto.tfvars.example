@@ -1,0 +1,5 @@
+location = "japaneast"
+identifier = "<identifier>"
+modules = [
+  "storage_as_service_endpoint",
+]

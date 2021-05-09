@@ -1,9 +1,15 @@
-# Deployment
+# Azure Functions access Storage account as Service Endpoint
 
-Move to terraform project directory and initialize it.
+Using Service Endpoint and virtual network restriction is an easy way to secure your routing from Azure Functions to Azure resources such as Storage Account.
+
+![Azure Function access to Storage account as a Service Endpoint](../../../docs/images/access-to-service-endpoint.png)
+
+## Deployment
+
+Move to this example directory (`terarform/examples/service_endpoint`) and initialize it.
 
 ```bash
-cd terraform
+cd terraform/examples/service_endpoint
 terraform init
 ```
 
@@ -13,7 +19,7 @@ Next, create `.auto.tfvars` with the following content. About `modules`, you nee
 location = "japaneast"
 identifier = "awesome-example"
 modules = [
-#  "storage_as_service_endpoint",
+  "storage_as_service_endpoint",
 ]
 ```
 
@@ -27,7 +33,7 @@ terraform apply
 After a while, the result would be shown.
 
 ```
-Apply complete! Resources: 79 added, 0 changed, 0 destroyed.
+Apply complete! Resources: 10 added, 0 changed, 0 destroyed.
 
 Outputs:
 
