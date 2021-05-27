@@ -52,6 +52,7 @@ jobs:
 
   
   create-draft-release:
+    environment: production
     needs:
     - build
     runs-on: ubuntu-latest

@@ -1,24 +1,14 @@
-# output "get_function_package_url_result" {
-#   value      = module.get_function_package_url.func.download_url
-#   depends_on = [module.get_function_package_url]
-# }
-
-output "storage_as_service_endpoint_function_url_check" {
-  value = try(module.storage_as_service_endpoint["selected"].function_url_check, "Not used")
+output "terraform_runner" {
+  value = {
+    resource_group_name  = module.pre.resource_group_name
+    virtual_network_name = module.pre.virtual_network_name
+    state = {
+      storage_account = module.pre.storage_account
+    }
+  }
 }
 
-output "storage_as_service_endpoint_west_eu_function_url_check" {
-  value = try(module.storage_as_service_endpoint_west_eu["selected"].function_url_check, "Not used")
-}
-
-output "storage_via_private_endpoint_function_url_check" {
-  value = try(module.storage_via_private_endpoint["selected"].function_url_check, "Not used")
-}
-
-output "access_cosmosdb_via_private_endpoint_function_url_check" {
-  value = try(module.access_cosmosdb_via_private_endpoint["selected"].function_url_check, "Not used")
-}
-
-output "access_func_via_private_endpoint_function_url_check" {
-  value = try(module.access_func_via_private_endpoint["selected"].function_url_check, "Not used")
+output "terraform_state_storage_account_access_key" {
+  value     = module.pre.storage_account_access_key
+  sensitive = true
 }

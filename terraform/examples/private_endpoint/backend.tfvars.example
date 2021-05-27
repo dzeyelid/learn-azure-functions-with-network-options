@@ -1,0 +1,4 @@
+storage_account_name = "<storage account name>"
+container_name       = "terraform-state"
+key                  = "terraform.tfstate"
+access_key           = "<storage account's access key>"

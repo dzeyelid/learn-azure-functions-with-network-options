@@ -1,0 +1,16 @@
+location = "japaneast"
+identifier = "<identifier>"
+
+terraform = {
+  virtual_network_name = "<Virtual network name that Terraform runner in>"
+  resource_group_name = "<Resource group name that Terraform runner in>"
+}
+
+modules = [
+  "storage_via_private_endpoint",
+  # "access_cosmosdb_via_private_endpoint",
+  # "access_func_via_private_endpoint",
+]
+
+# vm_admin_username = "<VM's admin username>"
+# vm_admin_password = "<VM's admin password>"

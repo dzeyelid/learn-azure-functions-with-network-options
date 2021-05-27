@@ -5,7 +5,3 @@ variable "identifier" {
 variable "location" {
   type = string
 }
-
-variable "modules" {
-  type = list(string)
-}
